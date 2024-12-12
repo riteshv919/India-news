@@ -1,42 +1,67 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { NewsContext } from '../context/NewsContext';
-import Newitem from './Newitem';
-import { fetchNewsByCategory, searchNews } from '../utils/api';
-import { Box, Typography } from '@mui/material'; // Import Box and Typography for spacing
+import React, { useEffect, useState } from 'react';
+import Newsitem from './Newitem';
 
 const NewsBoard = () => {
-  const { category, searchQuery } = useContext(NewsContext);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getNews = async () => {
-      setLoading(true);
-      let data;
-      if (searchQuery) {
-        data = await searchNews(searchQuery);
-      } else {
-        data = await fetchNewsByCategory(category);
+    const fetchNews = async () => {
+      try {
+        const url = `https://newsapi.org/v2/top-headlines?category=general&apiKey=${import.meta.env.VITE_API_KEY}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.articles) {
+          throw new Error("No articles found in the response.");
+        }
+
+        setArticles(data.articles);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-      setArticles(data);
-      setLoading(false);
     };
 
-    getNews();
-  }, [category, searchQuery]);
+    fetchNews();
+  }, []);
 
-  if (loading) return <h3>Loading...</h3>;
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-danger">Error: {error}</div>;
+  }
+
+  if (!Array.isArray(articles) || articles.length === 0) {
+    return <div className="text-center">No news available.</div>;
+  }
 
   return (
-    <Box sx={{ margin: 5 }}> {/* Added margin around the entire content */}
-      <Typography variant="h4" align="center" sx={{ marginBottom: 4 }}>
-        Latest <span className="badge text-bg-danger">News</span>
-      </Typography>
-
-      {articles.map((news, idx) => (
-        <Newitem key={idx} title={news.title} description={news.description} src={news.urlToImage} url={news.url} />
-      ))}
-    </Box>
+    <div className="news-board" style={{ marginTop: '20px' }}>
+      <h2 className="text-center">
+        Latest <span className="badge bg-danger">News</span>
+      </h2>
+      <div className="news-container">
+        {articles.map((news, idx) => (
+          <Newsitem
+            key={idx}
+            title={news.title}
+            description={news.description}
+            src={news.urlToImage}
+            url={news.url}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
