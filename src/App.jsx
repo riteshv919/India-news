@@ -1,7 +1,6 @@
 import React from 'react';
 import Navbar from './Components/Navbar';
 import NewsBoard from './Components/NewsBoard';
-import SavedNews from './pages/SavedNews';
 import AboutPage from './pages/AboutPage';  // Import AboutPage
 import ContactPage from './pages/ContactPage'; // Import ContactPage
 import { ThemeProvider } from './context/ThemeContext';
@@ -21,7 +20,6 @@ const App = () => {
           <main>
             <Routes>
               <Route path="/" element={<NewsBoard />} />
-              <Route path="/saved" element={<SavedNews />} />
               <Route path="/about" element={<AboutPage />} /> {/* Route for About */}
               <Route path="/contact" element={<ContactPage />} /> {/* Route for Contact */}
               <Route path="/privacy-policy" element={<PrivacyPolicy />} /> {/* Route for Privacy Policy */}
